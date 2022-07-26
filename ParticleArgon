@@ -1,0 +1,118 @@
+// Particle Argon Code
+
+
+// This #include statement was automatically added by the Particle IDE.
+#include <BH1750.h>
+
+// This #include statement was automatically added by the Particle IDE.
+#include <Adafruit_DHT.h>
+
+
+#define DHTTYPE  DHT11
+#define DHTPIN   D5
+
+#include "Particle.h"
+
+DHT dht(DHTPIN, DHTTYPE);
+
+double roomTemp; // Temp and humidity
+double roomHumidity;
+
+
+double currentLightLevel; // light level of room
+
+int data; // Data variable for IFTTT
+
+
+
+void setup() {
+  
+    Serial.begin(9600); 
+    Particle.variable("Temperature", &roomTemp, DOUBLE); // Const Variables for Light, Temp, Humidity
+    Particle.variable("Humidity", &roomHumidity, DOUBLE);
+    Particle.variable("Light-Level", &currentLightLevel, DOUBLE);
+
+    pinMode(A0, INPUT);  // Analouge Pin
+    
+  
+    dht.begin();
+}
+
+
+
+void loop() {
+    
+
+    double lightAnalogVal = analogRead(A0 // Reading light level on analog pin
+    
+    roomTemp = dht.getTempCelcius(); // Getting temp and humidity reading
+    
+    roomHumidity = dht.getHumidity();
+    
+
+    
+    Serial.print(roomTemp); 
+    Serial.print(",\t");
+    
+    Serial.print(roomHumidity);
+    Serial.print(",\t");
+    
+        
+    currentLightLevel = map(lightAnalogVal, 0.0, 4095.0, 0.0, 100.0); //getting light reading
+    
+    Particle.publish("Light-Levell", String(currentLightLevel), PRIVATE); // Light level printed
+    
+    // The above variabkles are set out as Temp, Humidity, Light, Time 
+    
+    Serial.print(",\t");
+    
+    Serial.print(Particle.publish("Another_hour")); // Printing Variable for another hour IFTTT intergration
+    
+    
+
+    
+    Serial.print("\n");
+    
+    delay(900000); // Delay in milisecos 15 mins
+
+
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+
+// Simulation Code for Testing purposes only
+
+#include <dht.h>
+
+dht DHT;
+
+#define DHT22_PIN 5
+
+
+
+void setup() {
+  
+    Serial.begin(115200);
+}
+
+
+
+void loop() {
+    
+    uint32_t start = micros();
+    int chk = DHT.read22(DHT22_PIN);
+    uint32_t stop = micros();
+
+    Serial.print(DHT.humidity, 1);
+    Serial.print(",\t");
+    Serial.print(DHT.temperature, 1);
+    Serial.print("\n");
+
+    
+    //delay(1000000); //Real wait value // 16 mins
+    delay(10000); // testing Value    
+
+}
